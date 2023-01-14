@@ -2,10 +2,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const firebase = require("firebase-admin");
+const serviceAccount = require("./serviceAccount.json");
 
 // service account key
-const serviceAccount = require("./serviceAccount.json");
-const createUser = require("./controllers/userController");
+
+const { createUser, createToken } = require("./controllers/userController");
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,7 +17,7 @@ firebase.initializeApp({
 });
 
 app.post("/user", createUser);
-
+app.get("/user/token", createToken);
 const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`Server is listening on ${PORT}`);
