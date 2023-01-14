@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
-  storageBucket: "gs://user-515d4.appspot.com",
+  storageBucket: "gs://user-2948c.appspot.com",
 });
 
 app.post("/user", createUser);
