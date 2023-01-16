@@ -51,4 +51,20 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = createUser;
+const createToken = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const userRecord = await auth().getUserByEmail(email);
+    if (!userRecord) {
+      return res.status(400).send({ message: "User not found" });
+    }
+
+    const token = await auth().createCustomToken(userRecord.uid);
+    res.status(200).send({ token });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+module.exports = { createUser, createToken };
