@@ -67,4 +67,24 @@ const createToken = async (req, res) => {
   }
 };
 
-module.exports = { createUser, createToken };
+const updateUserDetails = async (req, res) => {
+  try {
+    const { email, mobileNo } = req.body;
+    const user = await auth().getUserByEmail(email);
+    if (!user) {
+      res.status(404).send({ message: "No user found with that email" });
+    } else {
+      const doc = await firestore().collection("users").doc(user.uid).get();
+      if (!doc.exists) {
+        res.status(404).send({ message: "No user found with that email" });
+      } else {
+        await firestore().collection("users").doc(doc.id).update({ mobileNo });
+        res.status(200).send({ message: "User update successfully" });
+      }
+    }
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server error" });
+  }
+};
+
+module.exports = { createUser, createToken, updateUserDetails };
