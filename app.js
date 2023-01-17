@@ -10,8 +10,9 @@ const {
   createUser,
   createToken,
   updateUserDetails,
+  createPost,
 } = require("./controllers/userController");
-// Middleware
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -23,6 +24,7 @@ firebase.initializeApp({
 app.post("/user", createUser);
 app.get("/user/token", createToken);
 app.patch("/user/update", updateUserDetails);
+app.post("/createpost", createPost);
 const PORT = 8000;
 app.listen(PORT, () => {
   console.log(`Server is listening on ${PORT}`);
