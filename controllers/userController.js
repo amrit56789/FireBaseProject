@@ -53,17 +53,17 @@ const createUser = async (req, res) => {
 
 const createToken = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const userRecord = await auth().getUserByEmail(email);
     if (!userRecord) {
       return res.status(400).send({ message: "User not found" });
     }
 
-    const token = await auth().createCustomToken(userRecord.uid);
-    res.status(200).send({ token });
+    const token = await auth().createToken(userRecord.uid);
+    return token;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({ message: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
   }
 };
 
@@ -76,10 +76,12 @@ const updateUserDetails = async (req, res) => {
     } else {
       const doc = await firestore().collection("users").doc(user.uid).get();
       if (!doc.exists) {
-        res.status(404).send({ message: "No user found with that email" });
+        return res
+          .status(404)
+          .send({ message: "No user found with that email" });
       } else {
         await firestore().collection("users").doc(doc.id).update({ mobileNo });
-        res.status(200).send({ message: "User update successfully" });
+        return res.status(200).send({ message: "User update successfully" });
       }
     }
   } catch (error) {
@@ -87,4 +89,43 @@ const updateUserDetails = async (req, res) => {
   }
 };
 
-module.exports = { createUser, createToken, updateUserDetails };
+const createPost = async (req, res) => {
+  try {
+    const { title, createdBy, description } = req.body;
+
+    // Validate post input
+    if (!title || !createdBy || !description) {
+      return res.status(400).send({ message: "Please fill all the details" });
+    }
+
+    // create a slug from the title
+    let slug = title.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-");
+
+    // check slug if already exits
+    let postRef = await firestore()
+      .collection("post")
+      .where("slug", "==", slug)
+      .get();
+
+    let count = postRef.size;
+
+    if (count > 0) {
+      slug = `${slug}-${count}`;
+    }
+
+    const addPost = await firestore().collection("post").add({
+      title,
+      slug: slug,
+      createdAt: Date.now(),
+      createdBy: createdBy,
+      updatedAt: Date.now(),
+      description,
+    });
+    res.status(200).send({ addPost });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+module.exports = { createUser, createToken, updateUserDetails, createPost };
